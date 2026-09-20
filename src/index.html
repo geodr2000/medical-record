@@ -1,26 +1,717 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <title>Ionic App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0066b3">
+    <title>Medical Records</title>
+    <style>
+        :root {
+            --primary: #0066b3;
+            --primary-dark: #004a7f;
+            --secondary: #00a3e0;
+            --success: #10b981;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #f9fafb;
+            --border: #e5e7eb;
+            --white: #ffffff;
+            --radius: 8px;
+        }
 
-  <base href="/" />
+        * {
+            box-sizing: border-box;
+        }
 
-  <meta name="color-scheme" content="light dark" />
-  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="format-detection" content="telephone=no" />
-  <meta name="msapplication-tap-highlight" content="no" />
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
 
-  <link rel="icon" type="image/png" href="assets/icon/favicon.png" />
+        body {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
 
-  <!-- add to homescreen for ios -->
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            padding: 20px;
+            padding-top: calc(20px + env(safe-area-inset-top, 0px));
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin: 4px 0 0 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 4px;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 8px;
+            border: none;
+            background: none;
+            color: var(--text-light);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-button:active {
+            background: rgba(0, 102, 179, 0.05);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .tab-page {
+            display: none;
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        .tab-page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-camera {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-camera:active {
+            background: var(--primary-dark);
+        }
+
+        .btn-gallery {
+            flex: 1;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-gallery:active {
+            background: #0088b8;
+        }
+
+        .uploaded-images {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--bg);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-weight: bold;
+        }
+
+        .image-remove:active {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .medication-item {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .medication-info {
+            flex: 1;
+        }
+
+        .medication-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .medication-dosage {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-remove:active {
+            background: #dc2626;
+        }
+
+        .add-medication-form {
+            background: var(--bg);
+            padding: 12px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+        }
+
+        .add-medication-form input {
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:active {
+            background: var(--primary-dark);
+        }
+
+        .save-indicator {
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px;
+            font-size: 14px;
+        }
+    </style>
 </head>
-
 <body>
-  <app-root></app-root>
-</body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Patient Record</h1>
+            <p>Mobile Medical Information</p>
+        </div>
 
+        <div class="tabs">
+            <button class="tab-button active" data-tab="0">Personal</button>
+            <button class="tab-button" data-tab="1">Complaint</button>
+            <button class="tab-button" data-tab="2">Diagnosis</button>
+            <button class="tab-button" data-tab="3">Lab & Imaging</button>
+            <button class="tab-button" data-tab="4">Medication</button>
+        </div>
+
+        <div class="content">
+            <!-- Personal History -->
+            <div class="tab-page active" data-page="0">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" placeholder="Enter patient name">
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label>Age (years)</label>
+                        <input type="number" id="age" placeholder="e.g., 22" min="0" max="150">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="birthdate">
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label>Sex</label>
+                        <select id="sex">
+                            <option value="">Select...</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Marital Status</label>
+                        <select id="maritalStatus">
+                            <option value="">Select...</option>
+                            <option value="single">Single</option>
+                            <option value="married">Married</option>
+                            <option value="divorced">Divorced</option>
+                            <option value="widowed">Widowed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Complaint -->
+            <div class="tab-page" data-page="1">
+                <div class="form-group">
+                    <label>Chief Complaint</label>
+                    <textarea id="complaint" placeholder="Describe the patient's main complaint and symptoms..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Duration & Onset</label>
+                    <textarea id="complaintDetails" placeholder="When did it start? Has it changed? Any triggers?"></textarea>
+                </div>
+            </div>
+
+            <!-- Clinical Diagnosis -->
+            <div class="tab-page" data-page="2">
+                <div class="form-group">
+                    <label>Primary Diagnosis</label>
+                    <input type="text" id="primaryDiagnosis" placeholder="e.g., Type 2 Diabetes Mellitus">
+                </div>
+                <div class="form-group">
+                    <label>Secondary Diagnoses</label>
+                    <textarea id="secondaryDiagnosis" placeholder="Any secondary diagnoses or comorbidities..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Clinical Assessment</label>
+                    <textarea id="clinicalAssessment" placeholder="Physical examination findings and clinical observations..."></textarea>
+                </div>
+            </div>
+
+            <!-- Lab & Imaging -->
+            <div class="tab-page" data-page="3">
+                <div class="form-group">
+                    <label>Lab Results</label>
+                    <textarea id="labResults" placeholder="Test name, date, and results (e.g., HbA1c: 7.2%)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Imaging & X-rays</label>
+                    <div class="button-group">
+                        <button class="btn-camera" onclick="takeCameraPhoto()">📷 Take Photo</button>
+                        <button class="btn-gallery" onclick="pickFromGallery()">🖼️ Gallery</button>
+                    </div>
+                    <div class="uploaded-images" id="uploadedImages"></div>
+                </div>
+            </div>
+
+            <!-- Medication -->
+            <div class="tab-page" data-page="4">
+                <div class="add-medication-form">
+                    <input type="text" id="medName" placeholder="Medication name">
+                    <input type="text" id="medDosage" placeholder="Dosage (e.g., 500mg twice daily)">
+                    <button class="btn-primary" onclick="addMedication()" style="margin-top: 8px;">Add Medication</button>
+                </div>
+                <div id="medicationList" class="empty-state">No medications added yet</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">✓ Saved</div>
+
+    <script src="https://capacitor.ionicframework.com/capacitor.js"></script>
+    <script src="https://capacitor.ionicframework.com/plugin/camera.js"></script>
+
+    <script>
+        const { Camera, CameraResultType, CameraSource } = window.Capacitor.Plugins;
+        const STORAGE_KEY = 'medicalRecords';
+
+        // Load data on page load
+        window.addEventListener('load', loadData);
+
+        // Tab navigation
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const tabIndex = e.target.dataset.tab;
+                switchTab(tabIndex);
+            });
+        });
+
+        // Auto-save on input
+        document.querySelectorAll('input, textarea, select').forEach(element => {
+            element.addEventListener('change', saveData);
+            element.addEventListener('input', saveData);
+        });
+
+        async function takeCameraPhoto() {
+            try {
+                const image = await Camera.getPhoto({
+                    quality: 90,
+                    allowEditing: false,
+                    resultType: CameraResultType.DataUrl,
+                    source: CameraSource.Camera
+                });
+
+                addImageToRecords(image.dataUrl, 'camera-photo.jpg');
+            } catch (err) {
+                console.log('Camera error:', err);
+                showSaveIndicator('Camera access denied', 2000);
+            }
+        }
+
+        async function pickFromGallery() {
+            try {
+                const image = await Camera.getPhoto({
+                    quality: 90,
+                    allowEditing: false,
+                    resultType: CameraResultType.DataUrl,
+                    source: CameraSource.Photos
+                });
+
+                addImageToRecords(image.dataUrl, 'gallery-photo.jpg');
+            } catch (err) {
+                console.log('Gallery error:', err);
+                showSaveIndicator('Gallery access denied', 2000);
+            }
+        }
+
+        function addImageToRecords(imageData, fileName) {
+            const records = loadRecords();
+
+            if (!records.images) {
+                records.images = [];
+            }
+
+            records.images.push({
+                data: imageData,
+                name: fileName,
+                date: new Date().toLocaleString()
+            });
+
+            saveRecords(records);
+            displayImages(records.images);
+            switchTab(3); // Switch to Lab & Imaging tab
+        }
+
+        function displayImages(images) {
+            const container = document.getElementById('uploadedImages');
+            container.innerHTML = '';
+
+            if (!images || images.length === 0) return;
+
+            images.forEach((img, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-item';
+                div.innerHTML = `
+                    <img src="${img.data}" alt="${img.name}">
+                    <button class="image-remove" onclick="removeImage(${index})">×</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeImage(index) {
+            const records = loadRecords();
+            records.images.splice(index, 1);
+            saveRecords(records);
+            displayImages(records.images);
+        }
+
+        function addMedication() {
+            const name = document.getElementById('medName').value.trim();
+            const dosage = document.getElementById('medDosage').value.trim();
+
+            if (!name || !dosage) {
+                alert('Please enter medication name and dosage');
+                return;
+            }
+
+            const records = loadRecords();
+            if (!records.medications) {
+                records.medications = [];
+            }
+
+            records.medications.push({
+                name: name,
+                dosage: dosage,
+                id: Date.now()
+            });
+
+            saveRecords(records);
+            document.getElementById('medName').value = '';
+            document.getElementById('medDosage').value = '';
+            displayMedications(records.medications);
+            showSaveIndicator();
+        }
+
+        function removeMedication(id) {
+            const records = loadRecords();
+            records.medications = records.medications.filter(med => med.id !== id);
+            saveRecords(records);
+            displayMedications(records.medications);
+        }
+
+        function displayMedications(medications) {
+            const container = document.getElementById('medicationList');
+
+            if (!medications || medications.length === 0) {
+                container.innerHTML = '<div class="empty-state">No medications added yet</div>';
+                return;
+            }
+
+            container.innerHTML = medications.map(med => `
+                <div class="medication-item">
+                    <div class="medication-info">
+                        <div class="medication-name">${med.name}</div>
+                        <div class="medication-dosage">${med.dosage}</div>
+                    </div>
+                    <button class="btn-remove" onclick="removeMedication(${med.id})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function switchTab(index) {
+            // Hide all pages
+            document.querySelectorAll('.tab-page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected page
+            document.querySelector(`[data-page="${index}"]`).classList.add('active');
+            document.querySelector(`[data-tab="${index}"]`).classList.add('active');
+        }
+
+        function loadRecords() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function saveRecords(records) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            showSaveIndicator();
+        }
+
+        function saveData() {
+            const records = {
+                name: document.getElementById('name').value,
+                age: document.getElementById('age').value,
+                birthdate: document.getElementById('birthdate').value,
+                sex: document.getElementById('sex').value,
+                maritalStatus: document.getElementById('maritalStatus').value,
+                complaint: document.getElementById('complaint').value,
+                complaintDetails: document.getElementById('complaintDetails').value,
+                primaryDiagnosis: document.getElementById('primaryDiagnosis').value,
+                secondaryDiagnosis: document.getElementById('secondaryDiagnosis').value,
+                clinicalAssessment: document.getElementById('clinicalAssessment').value,
+                labResults: document.getElementById('labResults').value,
+                ...loadRecords()
+            };
+
+            saveRecords(records);
+        }
+
+        function loadData() {
+            const records = loadRecords();
+
+            document.getElementById('name').value = records.name || '';
+            document.getElementById('age').value = records.age || '';
+            document.getElementById('birthdate').value = records.birthdate || '';
+            document.getElementById('sex').value = records.sex || '';
+            document.getElementById('maritalStatus').value = records.maritalStatus || '';
+            document.getElementById('complaint').value = records.complaint || '';
+            document.getElementById('complaintDetails').value = records.complaintDetails || '';
+            document.getElementById('primaryDiagnosis').value = records.primaryDiagnosis || '';
+            document.getElementById('secondaryDiagnosis').value = records.secondaryDiagnosis || '';
+            document.getElementById('clinicalAssessment').value = records.clinicalAssessment || '';
+            document.getElementById('labResults').value = records.labResults || '';
+
+            if (records.images) displayImages(records.images);
+            if (records.medications) displayMedications(records.medications);
+        }
+
+        function showSaveIndicator(text = '✓ Saved', duration = 2000) {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.textContent = text;
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, duration);
+        }
+    </script>
+</body>
 </html>
