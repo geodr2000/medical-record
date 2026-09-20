@@ -1,0 +1,8 @@
+{
+  "name": "Medical Record",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular",
+  "id": "f807174e"
+}
